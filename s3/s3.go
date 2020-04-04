@@ -15,7 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-// S3 implements the apis.ObjStore interface for working with S3.
+// S3 implements the objstore.Store interface for working with S3.
 type S3 struct {
 	client *s3.S3
 }

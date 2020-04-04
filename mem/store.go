@@ -1,4 +1,4 @@
-package test
+package mem
 
 import (
 	"bytes"
@@ -9,18 +9,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Synthesis-AI-Dev/objstore"
 	"github.com/spf13/afero"
+
+	"github.com/Synthesis-AI-Dev/objstore"
 )
 
-// TmpStore is mock ObjStore implementation that can be used for tests. It "uploads"
+// Store is a mock ObjStore implementation that can be used for tests. It "uploads"
 // and "downloads" to an in-memory filesystem.
-type TmpStore struct {
+type Store struct {
 	fs afero.Fs
 }
 
 // GetPresignedURL generates a fake URL.
-func (s *TmpStore) GetPresignedURL(bucket, key string, expire time.Duration) (string, error) {
+func (s *Store) GetPresignedURL(bucket, key string, expire time.Duration) (string, error) {
 	return fmt.Sprintf("https://%s/%s", bucket, key), nil
 }
 
@@ -30,7 +31,7 @@ func keyPath(bucket, key string) string {
 
 // Upload implements the ObjStore.Upload interface. It stores the data in
 // memory in such a way it can be retrieved by Download.
-func (s *TmpStore) Upload(body io.Reader, bucket, key string, opts objstore.Options) error {
+func (s *Store) Upload(body io.Reader, bucket, key string, opts objstore.Options) error {
 	if err := s.fs.Mkdir(bucket, 0755); err != nil {
 		if strings.Index(err.Error(), "already exists") == -1 {
 			// bucket name is never unique, so this is ok
@@ -56,7 +57,7 @@ func (s *TmpStore) Upload(body io.Reader, bucket, key string, opts objstore.Opti
 
 // Download implements the ObjStore.Download interface. It retrieves the data
 // from an in-memory file store.
-func (s *TmpStore) Download(bucket, key string, opts objstore.Options) ([]byte, error) {
+func (s *Store) Download(bucket, key string, opts objstore.Options) ([]byte, error) {
 	fileName := keyPath(bucket, key)
 	_, err := s.fs.Stat(fileName)
 	if err != nil {
@@ -76,4 +77,12 @@ func (s *TmpStore) Download(bucket, key string, opts objstore.Options) ([]byte, 
 		return ioutil.ReadAll(body)
 	}
 	return buff, nil
+}
+
+// New constructs a new memory backed object store that implements the
+// objstore.Store interface.
+func New() *Store {
+	return &Store{
+		fs: afero.NewMemMapFs(),
+	}
 }
