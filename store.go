@@ -16,9 +16,9 @@ const (
 	Compressed Options = 1 << (32 - 1 - iota)
 )
 
-// ObjStore is a wrapper around an object store so we can change
+// Store is a wrapper around an object store so we can change
 // implementations easily especially during tests.
-type ObjStore interface {
+type Store interface {
 	// GetPresignedURL generates a URL that can be consumed by a third
 	// party for retrieving the object specified by its bucket and key. The
 	// URL is valid for expire minutes.
