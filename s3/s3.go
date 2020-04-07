@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"time"
@@ -44,9 +45,16 @@ func (s *S3) GetPresignedURL(bucket, key string, expire time.Duration) (string, 
 
 // Upload sends the body to the S3 bucket/key
 func (s *S3) Upload(body io.Reader, bucket, key string, opts objstore.Options) error {
+	if bucket == "" {
+		return fmt.Errorf("bucket name cannot be empty")
+	}
+	if key == "" {
+		return fmt.Errorf("key name cannot be empty")
+	}
 	if objstore.UseCompression(opts) {
 		var buff bytes.Buffer
 		zWriter := zlib.NewWriter(&buff)
+		defer zWriter.Close()
 		b, err := ioutil.ReadAll(body)
 		if err != nil {
 			return err
@@ -54,7 +62,6 @@ func (s *S3) Upload(body io.Reader, bucket, key string, opts objstore.Options) e
 		if _, err := zWriter.Write(b); err != nil {
 			return err
 		}
-		zWriter.Close()
 		body = bytes.NewReader(buff.Bytes())
 	}
 	uploader := s3manager.NewUploaderWithClient(s.client)
