@@ -1,6 +1,7 @@
 package objstore
 
 import (
+	"context"
 	"io"
 	"time"
 )
@@ -26,7 +27,7 @@ type Store interface {
 	// Upload the the contents of body to the specified bucket and key.
 	Upload(body io.Reader, bucket, key string, opts Options) error
 	// Download retrieves the key from the specified bucket.
-	Download(bucket, key string, opts Options) ([]byte, error)
+	Download(ctx context.Context, bucket, key string, opts Options) ([]byte, error)
 }
 
 // UseCompression returns true if the ObjStore implementation should use

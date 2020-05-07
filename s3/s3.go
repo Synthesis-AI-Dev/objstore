@@ -75,11 +75,8 @@ func (s *S3) Upload(body io.Reader, bucket, key string, opts objstore.Options) e
 
 // Download downloads the named key from the bucket and returns its contents
 // or an error.
-func (s *S3) Download(bucket, key string, opts objstore.Options) ([]byte, error) {
+func (s *S3) Download(ctx context.Context, bucket, key string, opts objstore.Options) ([]byte, error) {
 	downloader := s3manager.NewDownloaderWithClient(s.client)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
 
 	buff := &aws.WriteAtBuffer{}
 	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{

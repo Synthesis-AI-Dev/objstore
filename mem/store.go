@@ -3,6 +3,7 @@ package mem
 import (
 	"bytes"
 	"compress/zlib"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -57,7 +58,7 @@ func (s *Store) Upload(body io.Reader, bucket, key string, opts objstore.Options
 
 // Download implements the ObjStore.Download interface. It retrieves the data
 // from an in-memory file store.
-func (s *Store) Download(bucket, key string, opts objstore.Options) ([]byte, error) {
+func (s *Store) Download(ctx context.Context, bucket, key string, opts objstore.Options) ([]byte, error) {
 	fileName := keyPath(bucket, key)
 	_, err := s.fs.Stat(fileName)
 	if err != nil {
