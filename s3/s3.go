@@ -54,12 +54,15 @@ func (s *S3) Upload(body io.Reader, bucket, key string, opts objstore.Options) e
 	if objstore.UseCompression(opts) {
 		var buff bytes.Buffer
 		zWriter := zlib.NewWriter(&buff)
-		defer zWriter.Close()
 		b, err := ioutil.ReadAll(body)
 		if err != nil {
 			return err
 		}
 		if _, err := zWriter.Write(b); err != nil {
+			return err
+		}
+		// force a flush
+		if err := zWriter.Close(); err != nil {
 			return err
 		}
 		body = bytes.NewReader(buff.Bytes())
