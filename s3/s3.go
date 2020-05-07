@@ -86,6 +86,9 @@ func (s *S3) Download(bucket, key string, opts objstore.Options) ([]byte, error)
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	if objstore.UseCompression(opts) {
 		body, err := zlib.NewReader(bytes.NewReader(buff.Bytes()))
